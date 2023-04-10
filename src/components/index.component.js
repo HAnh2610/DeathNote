@@ -35,7 +35,7 @@ export default class Index extends Component {
                         <th>Tên</th>
                         <th>Địa chỉ</th>
                         <th>Tuổi</th>
-                        <th colSpan="2">Chức năng</th>
+                        <th colSpan="2">Chức vụ</th>
                     </tr>
                     </thead>
                     <tbody>
