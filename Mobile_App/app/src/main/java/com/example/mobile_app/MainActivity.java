@@ -1,6 +1,5 @@
 package com.example.mobile_app;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,6 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.gson.Gson;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btnClear).setOnClickListener(this);
         findViewById(R.id.btnEquals).setOnClickListener(this);
         findViewById(R.id.btnHistory).setOnClickListener(this);
+        findViewById(R.id.compass_button).setOnClickListener(this);
     }
 
     @Override
@@ -169,7 +171,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     isDecimalPressed = false;
                     count++;
                     stringBuilder = new StringBuilder();
-                    history = sharedPreferences.getString("history" + count, "") + num1 + " "+ operator + " " + num2 + " = " + result + "\n";
+                    Calculation calculation = new Calculation(num1, operator, num2, result);
+                    addHistory(calculation);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("history" + String.valueOf(count), history);
                     editor.apply();
@@ -182,6 +185,63 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.compass_button:
+                Intent intent_compass = new Intent(this, CompassActivity.class);
+                startActivity(intent_compass);
         }
     }
+
+    public static class Calculation {
+        private String operator;
+        private String num1, num2, result;
+
+        public Calculation( double num1, String operator, double num2, double result) {
+            this.num1 = String.valueOf(num1);
+            this.operator = operator;
+            this.num2 = String.valueOf(num2);
+            this.result = String.valueOf(result);
+        }
+
+        public String getNum1() {
+            return num1;
+        }
+        public void setNum1(String num1) {
+            this.num1 = num1;
+        }
+
+        public String getOperator() {
+            return operator;
+        }
+        public void setOperator(String operator) {
+            this.operator = operator;
+        }
+
+        public String getNum2() {
+            return num2;
+        }
+        public void setNum2(String num2) {
+            this.num2 = num2;
+        }
+
+        public String getResult() {
+            return result;
+        }
+
+        public void setResult(String result) {
+            this.result = result;
+        }
+
+        @Override
+        public String toString() {
+            return "History: " + num1 + " " + operator + " " + num2 + " " + result + "\n";
+        }
+    }
+    private void addHistory(Calculation calculation) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        int historyCount = sharedPreferences.getInt("historyCount", 0);
+        editor.putString("history" + historyCount, new Gson().toJson(calculation));
+        editor.putInt("historyCount", historyCount + 1);
+        editor.apply();
+    }
+
 }
