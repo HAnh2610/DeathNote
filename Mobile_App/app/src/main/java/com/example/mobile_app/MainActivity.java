@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -173,9 +175,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     stringBuilder = new StringBuilder();
                     Calculation calculation = new Calculation(num1, operator, num2, result);
                     addHistory(calculation);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("history" + String.valueOf(count), history);
-                    editor.apply();
                 }
                 break;
             case R.id.btn_output2:
@@ -237,11 +236,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
     private void addHistory(Calculation calculation) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        int historyCount = sharedPreferences.getInt("historyCount", 0);
-        editor.putString("history" + historyCount, new Gson().toJson(calculation));
-        editor.putInt("historyCount", historyCount + 1);
+        ArrayList<Calculation> history = new ArrayList<>();
+// add Calculation objects to history list
+
+// Store history object in SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("CalculationHistory", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(history);
+        editor.putString("history_object", json);
         editor.apply();
+        Toast.makeText(this, "Calculation history stored successfully", Toast.LENGTH_SHORT).show();
     }
 
 }

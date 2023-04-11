@@ -5,12 +5,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import es.dmoral.toasty.Toasty;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -34,32 +37,23 @@ public class HistoryActivity extends AppCompatActivity {
 
         ArrayList<MainActivity.Calculation> history = new ArrayList<>();
         for (int i = 20; i > (count - 20); i--) {
-            String historyString = sharedPreferences.getString("history" + String.valueOf(i - 1), null);
-            MainActivity.Calculation calculation = MainActivity.Calculation.fromString(historyString);
-            if (calculation != null) {
-                history.add(calculation);
-            }
+            // Retrieve history object from SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("CalculationHistory", MODE_PRIVATE);
+            Gson gson = new Gson();
+            String json = prefs.getString("history_object", "");
+            Type type = new TypeToken<ArrayList<MainActivity.Calculation>>() {
+            }.getType();
+            ArrayList<MainActivity.Calculation> history_output = gson.fromJson(json, type);
+            tvHistory.setText((CharSequence) history);
+            // Show toast message to indicate successful storage
+
+
+            btnBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    finish();
+                }
+            });
         }
-
-        String historyText = "";
-        for (MainActivity.Calculation calculation : history) {
-            historyText += calculation.toString() + "\n\n";
-        }
-        tvHistory.setText(historyText);
-
-        // Store history object in SharedPreferences
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("history_object", MainActivity.Calculation.toSerializedString(history));
-        editor.apply();
-
-        // Show toast message to indicate successful storage
-        Toasty.success(this, "Calculation history stored successfully", Toasty.LENGTH_SHORT).show();
-
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
     }
 }
