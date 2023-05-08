@@ -3,250 +3,241 @@ package com.example.mobile_app;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
+
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private TextView tvOutput, tv_output2, tvHistory;
-    private StringBuilder stringBuilder;
-    private boolean isDecimalPressed;
-    private double num1;
-    private double num2;
-    private double result;
-    private String operator;
-    private SharedPreferences sharedPreferences;
-    private int count;
-    private String history;
+    TextView resultTv, solutionTv;
+    MaterialButton buttonC, buttonBrakeOpen, getButtonBrakeClose;
+    MaterialButton buttonDivide, buttonMultiply, buttonPlus, buttonMinus, buttonEquals;
+    MaterialButton button0, button1, button2, button3, button4, button5, button6, button7, button8, button9;
+    MaterialButton buttonAC, buttonDot, buttonCompass, buttonHistory;
+    Gson gson = new Gson();
+    SharedPreferences sharedPreferences;
 
+    int historyCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        resultTv = findViewById(R.id.result_tv);
+        solutionTv = findViewById(R.id.solution_tv);
 
-        sharedPreferences = getSharedPreferences("CalculationHistory", MODE_PRIVATE);
+        assignId(buttonC, R.id.button_c);
+        assignId(buttonBrakeOpen, R.id.button_open_bracket);
+        assignId(getButtonBrakeClose, R.id.button_close_bracket);
+        assignId(buttonDivide, R.id.button_divide);
+        assignId(buttonMultiply, R.id.button_multiply);
+        assignId(buttonPlus, R.id.button_plus);
+        assignId(buttonMinus, R.id.button_minus);
+        assignId(buttonEquals, R.id.button_equal);
+        assignId(button0, R.id.button_0);
+        assignId(button1, R.id.button_1);
+        assignId(button2, R.id.button_2);
+        assignId(button3, R.id.button_3);
+        assignId(button4, R.id.button_4);
+        assignId(button5, R.id.button_5);
+        assignId(button6, R.id.button_6);
+        assignId(button7, R.id.button_7);
+        assignId(button8, R.id.button_8);
+        assignId(button9, R.id.button_9);
+        assignId(buttonAC, R.id.button_ac);
+        assignId(buttonDot, R.id.button_dot);
+        assignId(buttonCompass, R.id.bnt_Compass);
+        assignId(buttonHistory, R.id.bnt_History);
 
-        stringBuilder = new StringBuilder();
-        isDecimalPressed = false;
-        result = 0;
-        count = 0;
-        history = "";
+        // Store Previous Result
+        sharedPreferences = this.getSharedPreferences("com.example.mycalcuator", android.content.Context.MODE_PRIVATE);
 
-        tvOutput = findViewById(R.id.tv_output);
-        tv_output2 = findViewById(R.id.tv_output2);
-        tvHistory = findViewById(R.id.tvHistory);
+        String previous = sharedPreferences.getString("preResult", "");
 
-        findViewById(R.id.btn_output2).setOnClickListener(this);
-        findViewById(R.id.btn0).setOnClickListener(this);
-        findViewById(R.id.btn1).setOnClickListener(this);
-        findViewById(R.id.btn2).setOnClickListener(this);
-        findViewById(R.id.btn3).setOnClickListener(this);
-        findViewById(R.id.btn4).setOnClickListener(this);
-        findViewById(R.id.btn5).setOnClickListener(this);
-        findViewById(R.id.btn6).setOnClickListener(this);
-        findViewById(R.id.btn7).setOnClickListener(this);
-        findViewById(R.id.btn8).setOnClickListener(this);
-        findViewById(R.id.btn9).setOnClickListener(this);
-        findViewById(R.id.btnDot).setOnClickListener(this);
-        findViewById(R.id.btnPlus).setOnClickListener(this);
-        findViewById(R.id.btnMinus).setOnClickListener(this);
-        findViewById(R.id.btnDivide).setOnClickListener(this);
-        findViewById(R.id.btnMultiply).setOnClickListener(this);
-        findViewById(R.id.btnClear).setOnClickListener(this);
-        findViewById(R.id.btnEquals).setOnClickListener(this);
-        findViewById(R.id.btnHistory).setOnClickListener(this);
-        findViewById(R.id.compass_button).setOnClickListener(this);
+        Log.i("previous result", previous);
+
+        solutionTv.setText(previous);
+
+    }
+
+
+    void assignId(MaterialButton btn, int id){
+        btn = findViewById(id);
+        btn.setOnClickListener(this);
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn0:
-                stringBuilder.append("0");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn1:
-                stringBuilder.append("1");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn2:
-                stringBuilder.append("2");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn3:
-                stringBuilder.append("3");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn4:
-                stringBuilder.append("4");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn5:
-                stringBuilder.append("5");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn6:
-                stringBuilder.append("6");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn7:
-                stringBuilder.append("7");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn8:
-                stringBuilder.append("8");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btn9:
-                stringBuilder.append("9");
-                tvOutput.setText(stringBuilder.toString());
-                break;
-            case R.id.btnDot:
-                if (!isDecimalPressed) {
-                    stringBuilder.append(".");
-                    tvOutput.setText(stringBuilder.toString());
-                    isDecimalPressed = true;
-                }
-                break;
-            case R.id.btnPlus:
-                if (!stringBuilder.toString().isEmpty()) {
-                    num1 = Double.parseDouble(stringBuilder.toString());
-                    operator = "+";
-                    stringBuilder = new StringBuilder();
-                    tvOutput.setText(stringBuilder.toString());
-                    isDecimalPressed = false;
-                }
-                break;
-            case R.id.btnMinus:
-                if (!stringBuilder.toString().isEmpty()) {
-                    num1 = Double.parseDouble(stringBuilder.toString());
-                    operator = "-";
-                    stringBuilder = new StringBuilder();
-                    tvOutput.setText(stringBuilder.toString());
-                    isDecimalPressed = false;
-                }
-                break;
-            case R.id.btnDivide:
-                if (!stringBuilder.toString().isEmpty()) {
-                    num1 = Double.parseDouble(stringBuilder.toString());
-                    operator = "/";
-                    stringBuilder = new StringBuilder();
-                    tvOutput.setText(stringBuilder.toString());
-                    isDecimalPressed = false;
-                }
-                break;
-            case R.id.btnMultiply:
-                if (!stringBuilder.toString().isEmpty()) {
-                    num1 = Double.parseDouble(stringBuilder.toString());
-                    operator = "*";
-                    stringBuilder = new StringBuilder();
-                    tvOutput.setText(stringBuilder.toString());
-                    isDecimalPressed = false;
-                }
-                break;
-            case R.id.btnClear:
-                stringBuilder = new StringBuilder();
-                tvOutput.setText(stringBuilder.toString());
-                isDecimalPressed = false;
-                break;
-            case R.id.btnEquals:
-                if (!stringBuilder.toString().isEmpty()) {
-                    num2 = Double.parseDouble(stringBuilder.toString());
-                    if (operator.equals("+")) {
-                        result = num1 + num2;
-                    } else if (operator.equals("-")) {
-                        result = num1 - num2;
-                    } else if (operator.equals("*")) {
-                        result = num1 * num2;
-                    } else if (operator.equals("/")) {
-                        result = num1 / num2;
+    public void onClick(View view) {
+        MaterialButton button =(MaterialButton) view;
+        String buttonText = button.getText().toString();
+        String dataToCalculate = resultTv.getText().toString();
+
+        if(buttonText.equals("AC")){
+            solutionTv.setText("");
+            resultTv.setText("0");
+            return;
+        }
+
+        if(buttonText.equals("=")){
+            String finalResult = getResult(dataToCalculate);
+            resultTv.setText(finalResult);
+
+
+            // Store Previous Result
+            String preResult = dataToCalculate + "=" + finalResult;
+
+            // Store previous result to shared preferences
+            sharedPreferences.edit().putString("preResult", preResult).apply();
+
+            // Update previous result
+            String previous = sharedPreferences.getString("preResult", "");
+
+            Log.i("previous result", previous);
+
+            solutionTv.setText(previous);
+
+            historyCount += 1;
+
+            // Starting to save history operation
+            Thread SaveHistoryOperation = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    File path = getApplicationContext().getFilesDir();
+
+                    // Check if history.json exist
+                    File historyFile = new File(path + "/history.json");
+                    boolean isHistoryFileExist = historyFile.exists();
+                    if (!isHistoryFileExist) {
+                        try{
+                            FileOutputStream writer = new FileOutputStream(new File(path, "history.json"));
+                            HistoryOperation historyOperation = new HistoryOperation(solutionTv.getText().toString(), resultTv.getText().toString());
+                            List<HistoryOperation> list_HistoryOperation = new ArrayList<>();
+                            list_HistoryOperation.add(historyOperation);
+                            String str_HistoryOperationJson = gson.toJson(list_HistoryOperation);
+                            try {
+                                FileOutputStream fileOutputStream = new FileOutputStream(new File(path, "history.json"));
+                                fileOutputStream.write(str_HistoryOperationJson.getBytes());
+                                fileOutputStream.close();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "wrote to file: history.json" , Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        // Read history.json file
+                        File readFrom = new File(path, "history.json");
+                        String JSON_str_historyOperationList;
+                        byte[] byte_historyOperationList = new byte[(int) readFrom.length()];
+                        Type listType = new TypeToken<List<HistoryOperation>>(){}.getType();
+
+                        try {
+                            FileInputStream inputStream = new FileInputStream(readFrom);
+                            inputStream.read(byte_historyOperationList);
+                            JSON_str_historyOperationList = new String(byte_historyOperationList);
+                            ArrayList<HistoryOperation> historyOperationArrayList = gson.fromJson(JSON_str_historyOperationList, listType);
+                            int a = historyOperationArrayList.size();
+                            if (historyOperationArrayList.size() >= 10) {
+                                historyOperationArrayList.remove(0);
+                            }
+
+                            // After reading the history.json,
+                            // then we append a new operation the history operation list for saving
+                            HistoryOperation historyOperation = new HistoryOperation(solutionTv.getText().toString(), resultTv.getText().toString());
+                            historyOperationArrayList.add(historyOperation);
+                            String historyOperationString = gson.toJson(historyOperationArrayList);
+                            FileOutputStream writer = new FileOutputStream(new File(path, "history.json"));
+                            writer.write(historyOperationString.getBytes());
+                            writer.close();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "wrote to file: history.json" , Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                    tvOutput.setText(String.valueOf(result));
-                    isDecimalPressed = false;
-                    count++;
-                    stringBuilder = new StringBuilder();
-                    Calculation calculation = new Calculation(num1, operator, num2, result);
-                    addHistory(calculation);
                 }
-                break;
-            case R.id.btn_output2:
-                tv_output2.setText(String.valueOf(count));
-                break;
-            case R.id.btnHistory:
-                Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.compass_button:
-                Intent intent_compass = new Intent(this, CompassActivity.class);
-                startActivity(intent_compass);
+            });
+            SaveHistoryOperation.start();
+
+            return;
+        }
+
+        if(buttonText.equals("Compass")) {
+            OpenCompass();
+            return;
+        }
+
+        if(buttonHistory.equals("History")) {
+            OpenHistory();
+            return;
+        }
+
+        if(buttonText.equals("C")){
+            dataToCalculate = dataToCalculate.substring(0, dataToCalculate.length()-1);
+        }else{
+            dataToCalculate = dataToCalculate + buttonText;
+        }
+        resultTv.setText(dataToCalculate);
+
+    }
+
+    String getResult(String data){
+        try{
+            Context context  = Context.enter();
+            context.setOptimizationLevel(-1);
+            Scriptable scriptable = context.initStandardObjects();
+            String finalResult =  context.evaluateString(scriptable,data,"Javascript",1,null).toString();
+            if(finalResult.endsWith(".0")){
+                finalResult = finalResult.replace(".0","");
+            }
+            return finalResult;
+        }catch (Exception e){
+            return "Err";
         }
     }
 
-    public static class Calculation {
-        private String operator;
-        private String num1, num2, result;
-
-        public Calculation( double num1, String operator, double num2, double result) {
-            this.num1 = String.valueOf(num1);
-            this.operator = operator;
-            this.num2 = String.valueOf(num2);
-            this.result = String.valueOf(result);
-        }
-
-        public String getNum1() {
-            return num1;
-        }
-        public void setNum1(String num1) {
-            this.num1 = num1;
-        }
-
-        public String getOperator() {
-            return operator;
-        }
-        public void setOperator(String operator) {
-            this.operator = operator;
-        }
-
-        public String getNum2() {
-            return num2;
-        }
-        public void setNum2(String num2) {
-            this.num2 = num2;
-        }
-
-        public String getResult() {
-            return result;
-        }
-
-        public void setResult(String result) {
-            this.result = result;
-        }
-
-        @Override
-        public String toString() {
-            return "History: " + num1 + " " + operator + " " + num2 + " " + result + "\n";
-        }
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, HistoryActivity.class);
+        intent.putExtra("HistoryCount", String.valueOf(historyCount));
+        startActivity(intent);
     }
-    private void addHistory(Calculation calculation) {
-        ArrayList<Calculation> history = new ArrayList<>();
-// add Calculation objects to history list
 
-// Store history object in SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("CalculationHistory", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(history);
-        editor.putString("history_object", json);
-        editor.apply();
-        Toast.makeText(this, "Calculation history stored successfully", Toast.LENGTH_SHORT).show();
+    public void OpenCompass() {
+        Intent intent_compass = new Intent(this, CompassActivity.class);
+        startActivity(intent_compass);
+    }
+
+    public void OpenHistory() {
+        Intent intent_history = new Intent(this, HistoryActivity.class);
+        startActivity(intent_history);
     }
 
 }

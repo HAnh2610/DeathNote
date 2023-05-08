@@ -1,59 +1,98 @@
 package com.example.mobile_app;
 
-import android.content.SharedPreferences;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
 
-    private TextView tvHistory;
-    private SharedPreferences sharedPreferences;
-    private int count;
-    private Button btnBack;
+    Gson gson = new Gson();
+    ListView lv_history;
+    Button btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
-
+        Intent intent = getIntent();
+        String historyCount = intent.getStringExtra("HistoryCount");
+        lv_history = findViewById(R.id.lvHistory);
         btnBack = findViewById(R.id.btnBack);
-        tvHistory = findViewById(R.id.tvHistory);
-        sharedPreferences = getSharedPreferences("CalculationHistory", MODE_PRIVATE);
 
-        if (getIntent().getExtras() != null) {
-            count = getIntent().getExtras().getInt("count");
-        }
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
-        ArrayList<MainActivity.Calculation> history = new ArrayList<>();
-        for (int i = 20; i > (count - 20); i--) {
-            // Retrieve history object from SharedPreferences
-            SharedPreferences prefs = getSharedPreferences("CalculationHistory", MODE_PRIVATE);
-            Gson gson = new Gson();
-            String json = prefs.getString("history_object", "");
-            Type type = new TypeToken<ArrayList<MainActivity.Calculation>>() {
-            }.getType();
-            ArrayList<MainActivity.Calculation> history_output = gson.fromJson(json, type);
-            tvHistory.setText((CharSequence) history);
-            // Show toast message to indicate successful storage
+        // Create a thread for reading history operation
+        Thread ReadHistoryOperationThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File filePath = getApplicationContext().getFilesDir();
+                File readFrom = new File(filePath, "history.json");
+                String str_historyOperation;
+                byte[] byte_historyOperation = new byte[(int) readFrom.length()];
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(readFrom);
+                    fileInputStream.read(byte_historyOperation);
+                    str_historyOperation = new String(byte_historyOperation);
 
+                    Type listType = new TypeToken<List<HistoryOperation>>() {
+                    }.getType();
+                    ArrayList<HistoryOperation> list_HistoryOperation = gson.fromJson(str_historyOperation, listType);
 
-            btnBack.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    finish();
+                    String[] arr_HistoryOperation = new String[list_HistoryOperation.size()];
+                    for (int i = 0; i < list_HistoryOperation.size(); i++) {
+                        arr_HistoryOperation[i] = list_HistoryOperation.get(i).operation +
+                                " = " + list_HistoryOperation.get(i).result;
+                    }
+
+                    ArrayAdapter arrayAdapter = new ArrayAdapter(HistoryActivity.this,
+                            android.R.layout.simple_list_item_1, arr_HistoryOperation);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            lv_history.setAdapter(arrayAdapter);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
+        });
+        ReadHistoryOperationThread.start();
+    }
+
+    public String readFromFile(String fileName) {
+        File path = getApplicationContext().getFilesDir();
+        File readFrom = new File(path, fileName);
+        byte[] history = new byte[(int) readFrom.length()];
+        try {
+            FileInputStream stream = new FileInputStream(readFrom);
+            stream.read(history);
+            return new String(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.toString();
         }
     }
 }
