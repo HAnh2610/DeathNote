@@ -9,3 +9,4 @@ public class HistoryOperation {
         this.result = result;
     }
 }
+

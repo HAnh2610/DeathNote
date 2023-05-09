@@ -24,7 +24,6 @@ public class HistoryActivity extends AppCompatActivity {
     Gson gson = new Gson();
     ListView lv_history;
     Button btnBack;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +53,7 @@ public class HistoryActivity extends AppCompatActivity {
                     fileInputStream.read(byte_historyOperation);
                     str_historyOperation = new String(byte_historyOperation);
 
-                    Type listType = new TypeToken<List<HistoryOperation>>() {
-                    }.getType();
+                    Type listType = new TypeToken<List<HistoryOperation>>(){}.getType();
                     ArrayList<HistoryOperation> list_HistoryOperation = gson.fromJson(str_historyOperation, listType);
 
                     String[] arr_HistoryOperation = new String[list_HistoryOperation.size()];
@@ -95,4 +93,9 @@ public class HistoryActivity extends AppCompatActivity {
             return e.toString();
         }
     }
+
+//    public void next_exercise(View view) {
+//        Intent intent = new Intent(this, TestAPI.class);
+//        startActivity(intent);
+//    }
 }

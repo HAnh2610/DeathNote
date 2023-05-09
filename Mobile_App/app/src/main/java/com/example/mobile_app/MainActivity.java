@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     MaterialButton buttonC, buttonBrakeOpen, getButtonBrakeClose;
     MaterialButton buttonDivide, buttonMultiply, buttonPlus, buttonMinus, buttonEquals;
     MaterialButton button0, button1, button2, button3, button4, button5, button6, button7, button8, button9;
-    MaterialButton buttonAC, buttonDot, buttonCompass, buttonHistory;
+    MaterialButton buttonAC, buttonDot, buttonCompass;
     Gson gson = new Gson();
     SharedPreferences sharedPreferences;
 
@@ -65,10 +65,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         assignId(buttonAC, R.id.button_ac);
         assignId(buttonDot, R.id.button_dot);
         assignId(buttonCompass, R.id.bnt_Compass);
-        assignId(buttonHistory, R.id.bnt_History);
 
         // Store Previous Result
-        sharedPreferences = this.getSharedPreferences("com.example.mycalcuator", android.content.Context.MODE_PRIVATE);
+        sharedPreferences = this.getSharedPreferences("com.example.mobile_app", android.content.Context.MODE_PRIVATE);
 
         String previous = sharedPreferences.getString("preResult", "");
 
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-        if(buttonText.equals("=")){
+        if(buttonText.equals("=")) {
             String finalResult = getResult(dataToCalculate);
             resultTv.setText(finalResult);
 
@@ -126,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     File historyFile = new File(path + "/history.json");
                     boolean isHistoryFileExist = historyFile.exists();
                     if (!isHistoryFileExist) {
-                        try{
+                        try {
                             FileOutputStream writer = new FileOutputStream(new File(path, "history.json"));
                             HistoryOperation historyOperation = new HistoryOperation(solutionTv.getText().toString(), resultTv.getText().toString());
                             List<HistoryOperation> list_HistoryOperation = new ArrayList<>();
@@ -139,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getApplicationContext(), "wrote to file: history.json" , Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getApplicationContext(), "wrote to file: history.json", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             } catch (Exception e) {
@@ -153,7 +152,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         File readFrom = new File(path, "history.json");
                         String JSON_str_historyOperationList;
                         byte[] byte_historyOperationList = new byte[(int) readFrom.length()];
-                        Type listType = new TypeToken<List<HistoryOperation>>(){}.getType();
+                        Type listType = new TypeToken<List<HistoryOperation>>() {
+                        }.getType();
 
                         try {
                             FileInputStream inputStream = new FileInputStream(readFrom);
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(getApplicationContext(), "wrote to file: history.json" , Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "wrote to file: history.json", Toast.LENGTH_SHORT).show();
                                 }
                             });
                         } catch (Exception e) {
@@ -192,11 +192,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(buttonText.equals("Compass")) {
             OpenCompass();
-            return;
-        }
-
-        if(buttonHistory.equals("History")) {
-            OpenHistory();
             return;
         }
 
@@ -234,10 +229,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent_compass = new Intent(this, CompassActivity.class);
         startActivity(intent_compass);
     }
-
-    public void OpenHistory() {
-        Intent intent_history = new Intent(this, HistoryActivity.class);
-        startActivity(intent_history);
-    }
+//
+//    public void OpenHistory() {
+//        Intent intent_history = new Intent(this, HistoryActivity.class);
+//        startActivity(intent_history);
+//    }
 
 }
